@@ -143,8 +143,12 @@ class AssistantComms:
     def pretty_print(self, messages):
         print("# Messages")
         for m in messages:
-            print(f"{m.role}: {m.content[0].text.value}")
+            message = f"{m.role}: {m.content[0].text.value}"
+            message_without_backslashes = message.replace("\\", "")
+            print(message_without_backslashes)
         print()
+
+        
     
 
 if __name__ == "__main__":
