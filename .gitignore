@@ -1,2 +1,3 @@
 .env
 openai_env
+promp_temps
