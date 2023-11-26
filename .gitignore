@@ -1,3 +1,6 @@
 .env
 openai_env
 promp_temps
+tester.py
+test.txt
+__pycache__
