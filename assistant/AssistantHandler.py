@@ -22,3 +22,44 @@ class AssistantHandler:
             before= before_param
         )
         return filtered_list
+    
+    def file_uploader(self, file):
+        file = self.client.files.create(
+        file=open(file, "rb"),
+        purpose='assistants'
+        )
+
+        return file
+        
+    def attach_file(self, assistant_id, file_id):
+        assistant_file = self.client.beta.assistants.files.create(
+        assistant_id = assistant_id,
+        file_id = file_id
+        )
+
+        return assistant_file
+        
+        
+    def retrieve_assistant_files(self, assistant_id, file_id):
+        assistant_file = self.client.beta.assistants.files.retrieve(
+        assistant_id = assistant_id,
+        file_id = file_id
+        )
+
+        return assistant_file
+    
+    def delete_assistant_file(self, assistant_id, file_id):
+        deleted_assistant_file = self.client.beta.assistants.files.delete(
+        assistant_id = assistant_id,
+        file_id = file_id
+        )
+
+        return deleted_assistant_file
+
+    def list_assistant_files(self, assistant_id):
+        assistant_files = self.client.beta.assistants.files.list(
+        assistant_id = assistant_id
+        )
+
+        return assistant_files
+
