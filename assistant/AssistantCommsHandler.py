@@ -32,7 +32,7 @@ class AssistantCommsHandler:
 
     Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
     """
-    
+
     def __init__(self, client):
         self.client = client
 
@@ -54,13 +54,13 @@ class AssistantCommsHandler:
         response = self.client.beta.threads.delete(thread_id)
         return response
     
-    def create_message(self, thread_id, user_input, file_ids = None, metadata = None):
+    def create_message(self, thread_id, user_input, file_ids = [], metadata = {}):
         message = self.client.beta.threads.messages.create(
             thread_id,
             role = "user",
             content = user_input,
-            file_ids = [file_ids],
-            metadata = {metadata}
+            file_ids = file_ids,
+            metadata = metadata
         )
 
         return message
@@ -73,11 +73,11 @@ class AssistantCommsHandler:
 
         return message
     
-    def modify_message(self, message_id, thread_id, metadata = None):
+    def modify_message(self, message_id, thread_id, metadata = {}):
         message = self.client.beta.threads.messages.update(
             message_id = message_id,
             thread_id = thread_id,
-            metadata={metadata},
+            metadata=metadata,
         )
 
         return message
