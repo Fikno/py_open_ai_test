@@ -1,47 +1,47 @@
 class BuildAssistant:
+
+    """
+    A class for building and managing OpenAI ChatGPT Assistants.
+
+    Parameters:
+    - client (OpenAIAPI): An instance of the OpenAI API client.
+    - name (str): The name of the assistant.
+    - description (str): A brief description of the assistant.
+    - model (str): The language model used by the assistant.
+    - instructions (str): Instructions for the assistant.
+    - tools (list): A list of tools to be associated with the assistant.
+    - file_ids (list): A list of file IDs to be associated with the assistant.
+
+    Attributes:
+    - client (OpenAIAPI): The OpenAI API client instance.
+    - name (str): The name of the assistant.
+    - description (str): A brief description of the assistant.
+    - model (str): The language model used by the assistant.
+    - instructions (str): Instructions for the assistant.
+    - tools (list): A list of tools associated with the assistant.
+    - file_ids (list): A list of file IDs associated with the assistant.
+    - assistant (str): The created assistant instance.
+    - assistant_id (str): The ID of the created assistant.
+
+    Methods:
+    - get_name(): Get the name of the assistant.
+    - get_description(): Get the description of the assistant.
+    - get_model(): Get the language model used by the assistant.
+    - get_instructions(): Get the instructions for the assistant.
+    - get_tools(): Get the list of tools associated with the assistant.
+    - get_file_ids(): Get the list of file IDs associated with the assistant.
+    - get_assistant(): Get the created assistant instance.
+    - get_assistant_id(): Get the ID of the created assistant.
+    - set_tools(tools): Set the list of tools associated with the assistant.
+    - set_file_ids(file_ids): Set the list of file IDs associated with the assistant.
+    - update_assistant_tools(new_tools): Update the list of tools associated with the assistant.
+    - build_assistant(): Create a new assistant with the specified parameters and store its information.
+
+    Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
+    """
+    
     def __init__(self, client, name=None, description=None, model=None, instructions=None,
                  tools=None, file_ids=None):
-        
-        """
-        Initialize a BuildAssistant object.
-
-        Parameters:
-        - client: object or None, Required
-          Client object used for authentication with API.
-
-        - name: str or None, Optional
-          The name of the assistant. The maximum length is 256 characters.
-
-        - description: str or None, Optional
-          The description of the assistant. The maximum length is 512 characters.
-
-        - model: Required
-          ID of the model to use. You can use the List models API to see all of your available models,
-          or see our Model overview for descriptions of them.
-
-        - instructions: str or None, Optional
-          The system instructions that the assistant uses. The maximum length is 32768 characters.
-
-        - tools: list, Optional
-          Defaults to an empty list.
-          A list of tool enabled on the assistant. There can be a maximum of 128 tools per assistant.
-          Tools can be of types code_interpreter, retrieval, or function.
-
-        - file_ids: list, Optional
-          Defaults to an empty list.
-          A list of file IDs attached to this assistant. There can be a maximum of 20 files attached to the assistant.
-          Files are ordered by their creation date in ascending order.
-
-        - assistant: object, Optional
-          Defaults to an empty dictionary.
-          An object. This will not be assigned upon creation of an instance of this object,
-          but when a later defined method of this class object is run.
-
-        - assistant_id: str, Optional
-          Defaults to an empty string.
-          A string value representing the assistant id. This will not be assigned upon creation of an instance of this object,
-          but when a later defined method of this class object is run.
-        """
 
         self.client = client
         self.name = name

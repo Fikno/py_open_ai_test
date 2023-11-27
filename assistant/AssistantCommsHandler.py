@@ -1,6 +1,38 @@
 import time
 
 class AssistantCommsHandler:
+    """
+    A class that provides methods for interacting with communication threads and runs
+    using the OpenAI API.
+
+    Parameters:
+    - client (OpenAIAPI): An instance of the OpenAI API client.
+
+    Methods:
+    - create_thread(messages=None): Create a new communication thread.
+    - retrieve_thread(thread_id): Retrieve information about a specific thread.
+    - modify_thread(thread_id): Modify the properties of a specific thread.
+    - delete_thread(thread_id): Delete a specific thread.
+    - create_message(thread_id, user_input, file_ids=None, metadata=None): Create a new message in a thread.
+    - retrieve_message(message_id, thread_id): Retrieve information about a specific message in a thread.
+    - modify_message(message_id, thread_id, metadata=None): Modify the properties of a specific message in a thread.
+    - list_messages(thread_id, limit=20, order="desc", after=None, before=None): List messages in a thread.
+    - retrieve_message_file(thread_id, message_id, file_id): Retrieve information about a file attached to a message.
+    - list_message_files(thread_id, message_id, limit=20, order="desc", after=None, before=None): List files attached to a message.
+    - create_run(thread_id, assistant_id, model=None, instructions=None, tools=None, metadata=None): Create a new run in a thread.
+    - retrieve_run(thread_id, run_id): Retrieve information about a specific run in a thread.
+    - modify_run(thread_id, run_id, metadata=None): Modify the properties of a specific run in a thread.
+    - list_runs(thread_id, limit=20, order="desc", after=None, before=None): List runs in a thread.
+    - submit_tool_outputs_to_run(thread_id, run_id, tool_outputs={}): Submit tool outputs to a specific run in a thread.
+    - cancel_run(thread_id, run_id): Cancel a specific run in a thread.
+    - create_thread_and_run(assistant_id, user_input): Create a new thread and run with a user input message.
+    - retrieve_run_step(thread_id, run_id, step_id): Retrieve information about a specific step in a run.
+    - list_run_steps(thread_id, run_id, limit=20, order="desc", after=None, before=None): List steps in a run.
+    - wait_on_run(run, thread): Wait for a run to complete before proceeding.
+
+    Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
+    """
+    
     def __init__(self, client):
         self.client = client
 
