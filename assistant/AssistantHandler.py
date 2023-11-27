@@ -62,4 +62,3 @@ class AssistantHandler:
         )
 
         return assistant_files
-

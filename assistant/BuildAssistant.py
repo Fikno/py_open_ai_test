@@ -82,6 +82,13 @@ class BuildAssistant:
 
     def set_file_ids(self, file_ids):
         self.file_ids = file_ids
+
+    def update_assistant_tools(self, new_tools):
+        self.tools.append(new_tools)
+        self.assistant = self.client.beta.assistants.update(
+            self.assistant_id,
+            tools=self.tools,
+        )
     
     def build_assistant(self):
         self.assistant = self.client.beta.assistants.create(
