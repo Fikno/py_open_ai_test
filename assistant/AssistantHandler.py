@@ -34,7 +34,9 @@ class AssistantHandler:
         return response
         
     def list_all_assistants(self):
-        all_assistants = self.client.beta.assistants.list()
+        all_assistants = self.client.beta.assistants.list(
+            limit = 100
+        )
         return all_assistants
         
     def filtered_list_assistants(self, limit_param=20, order_param='desc', after_param=None, before_param=None):
