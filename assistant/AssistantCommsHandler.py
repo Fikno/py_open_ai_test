@@ -1,4 +1,6 @@
 import time
+import json
+from FunctionManager import FunctionManager
 
 class AssistantCommsHandler:
     """
@@ -33,8 +35,13 @@ class AssistantCommsHandler:
     Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
     """
 
-    def __init__(self, client):
+    def __init__(self, client, dbhost, dbname, dbuser, dbpassword, dbport):
         self.client = client
+        self.dbhost = dbhost
+        self.dbname = dbname
+        self.dbuser = dbuser
+        self.dbpassword = dbpassword
+        self.dbport = dbport
 
     def create_thread(self, messages = None):
         thread = self.client.beta.threads.create(
@@ -158,7 +165,7 @@ class AssistantCommsHandler:
         run = self.client.beta.threads.runs.submit_tool_outputs(
             thread_id = thread_id,
             run_id = run_id,
-            tool_outputs=[tool_outputs]
+            tool_outputs=tool_outputs
         )
 
         return run
@@ -205,12 +212,60 @@ class AssistantCommsHandler:
         return run_steps
     
     def wait_on_run(self, run, thread):
-        while run.status == "queued" or run.status == "in_progress":
-            run = self.client.beta.threads.runs.retrieve(
-             thread_id=thread.id,
+        functions_returns = []
+
+        while run.status != "completed":
+            run = self.retrieve_run(
+                thread_id=thread.id,
                 run_id=run.id,
             )
-            time.sleep(0.2)
+            time.sleep(0.5)
+            #print(run.status)
+
+            if run.status == "requires_action":
+                data = json.loads(run.model_dump_json())
+                function_entries = data["required_action"]["submit_tool_outputs"]["tool_calls"]
+                functions_info = []
+
+                for entry in function_entries:
+                    function_call_id = entry["id"]
+                    function_name = entry["function"]["name"]
+                    arguments_str = json.loads(entry["function"]["arguments"])
+
+                    functions_info.append((function_call_id, function_name, arguments_str))
+
+                function_manager = FunctionManager(self.dbhost, self.dbname, self.dbuser, self.dbpassword, self.dbport)
+
+                for function in functions_info:
+                    function_info_from_db = function_manager.retrieve_function_is_safe_by_name(function[1])
+                    db_function = function_info_from_db[0]
+                    db_is_safe = function_info_from_db[1]
+                    exec_result = {}
+
+                    print(f"Function Call ID: {function[0]}, Function Name: {function[1]}, Arguments: {function[2]}")
+
+                    if not db_is_safe:
+                        want_to_run = input(f"do you want to run function: {function[1]}, with the following arguments: {function[2]}?: (y/n)")
+                        if want_to_run.lower() != "y":
+                            self.cancel_run(thread.id, run.id)
+                            print("Canceled")
+
+                    exec(db_function, exec_result)
+
+                    db_to_py_function = exec_result.get(function[1])
+                    result = db_to_py_function(function[2])
+
+                    functions_returns.append({"tool_call_id": function[0], "output": str(result)})
+
+                function_manager.close_connection()
+
+                if functions_returns:
+                    self.submit_tool_outputs_to_run(thread.id, run.id, functions_returns)
+                    print("Returns")
+                    functions_returns.clear()
+                #self.wait_on_run(run, thread)
+
+        # Keep this return
         return run
 
 
