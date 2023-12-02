@@ -5,3 +5,4 @@ tester.py
 test.txt
 __pycache__
 delete_all_assistants.py
+test_db.py
