@@ -4,11 +4,11 @@ from typing_extensions import Annotated
 from pydantic import Field, StringConstraints
 from instructor import OpenAISchema
 
-from assistant_tools.LazyLoadModule import LazyLoadModule
-from assistant_tools.ListRunSteps import ListRunSteps
-from assistant_tools.RetrieveRun import RetrieveRun
-from assistant_tools.CancelRun import CancelRun
-from assistant_tools.SubmitToolOutputsToRun import SubmitToolOutputsToRun
+from assistant_tools import LazyLoadModule
+from assistant_tools import RetrieveRun
+from assistant_tools import CancelRun
+from assistant_tools import SubmitToolOutputsToRun
+
 
 class WaitOnRun(OpenAISchema):
 
@@ -17,10 +17,10 @@ class WaitOnRun(OpenAISchema):
     client: Any = Field(default="",
         description="Open AI Client to be set by the user.")
 
-    thread_run : Type[object] = Field(...,
+    thread_run : Any = Field(...,
         description="The run to be executed")
     
-    thread: Type[object] = Field(...,
+    thread: Any = Field(...,
         description="The thread the run is excuted on")
     
     def run(self):

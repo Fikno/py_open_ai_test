@@ -15,7 +15,7 @@ class ListMessages(OpenAISchema):
     limit: int = Field(default=20,
         description="Amount of messages to be listed. Limit can range between 1 and 100")
     
-    order: Literal["asc", "desc"] = Field(default="desc",
+    order: Literal["asc", "desc"] = Field(default="asc",
         description="ascending or descending order of messages to be listed")
     
     after: Optional[str] = Field(default=None,
