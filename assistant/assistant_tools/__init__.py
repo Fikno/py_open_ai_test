@@ -10,6 +10,7 @@ from .DeleteAssistantFile import DeleteAssistantFile
 from .DeleteThread import DeleteThread
 from .FileUploaderOpenAI import FileUploaderOpenAI
 from .FilteredListAssistants import FilteredListAssistants
+from .GetToolsSchema import GetToolsSchema
 from .LazyLoadModule import LazyLoadModule
 from .ListAssistantFiles import ListAssistantFiles
 from .ListMessageFiles import ListMessageFiles
@@ -44,6 +45,7 @@ __all__ = ["Assistant",
     "DeleteThread",
     "FileUploaderOpenAI",
     "FilteredListAssistants",
+    "GetToolsSchema",
     "LazyLoadModule",
     "ListAssistantFiles",
     "ListMessageFiles",
