@@ -1,47 +1,25 @@
 import time
 import json
-from FunctionManager import FunctionManager
+from assistant_tools.LazyLoadModule import LazyLoadModule
+
+
+def show_json(obj):
+        print(json.loads(obj.model_dump_json()))
+
+from typing import Optional, List, Literal, Dict, Any, Type
+from typing_extensions import Annotated
+
+from pydantic import Field, StringConstraints
+from instructor import OpenAISchema
+
+
 
 class AssistantCommsHandler:
-    """
-    A class that provides methods for interacting with communication threads and runs
-    using the OpenAI API.
+    
 
-    Parameters:
-    - client (OpenAIAPI): An instance of the OpenAI API client.
-
-    Methods:
-    - create_thread(messages=None): Create a new communication thread.
-    - retrieve_thread(thread_id): Retrieve information about a specific thread.
-    - modify_thread(thread_id): Modify the properties of a specific thread.
-    - delete_thread(thread_id): Delete a specific thread.
-    - create_message(thread_id, user_input, file_ids=None, metadata=None): Create a new message in a thread.
-    - retrieve_message(message_id, thread_id): Retrieve information about a specific message in a thread.
-    - modify_message(message_id, thread_id, metadata=None): Modify the properties of a specific message in a thread.
-    - list_messages(thread_id, limit=20, order="desc", after=None, before=None): List messages in a thread.
-    - retrieve_message_file(thread_id, message_id, file_id): Retrieve information about a file attached to a message.
-    - list_message_files(thread_id, message_id, limit=20, order="desc", after=None, before=None): List files attached to a message.
-    - create_run(thread_id, assistant_id, model=None, instructions=None, tools=None, metadata=None): Create a new run in a thread.
-    - retrieve_run(thread_id, run_id): Retrieve information about a specific run in a thread.
-    - modify_run(thread_id, run_id, metadata=None): Modify the properties of a specific run in a thread.
-    - list_runs(thread_id, limit=20, order="desc", after=None, before=None): List runs in a thread.
-    - submit_tool_outputs_to_run(thread_id, run_id, tool_outputs={}): Submit tool outputs to a specific run in a thread.
-    - cancel_run(thread_id, run_id): Cancel a specific run in a thread.
-    - create_thread_and_run(assistant_id, user_input): Create a new thread and run with a user input message.
-    - retrieve_run_step(thread_id, run_id, step_id): Retrieve information about a specific step in a run.
-    - list_run_steps(thread_id, run_id, limit=20, order="desc", after=None, before=None): List steps in a run.
-    - wait_on_run(run, thread): Wait for a run to complete before proceeding.
-
-    Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
-    """
-
-    def __init__(self, client, dbhost, dbname, dbuser, dbpassword, dbport):
+    def __init__(self, client, function_manager):
         self.client = client
-        self.dbhost = dbhost
-        self.dbname = dbname
-        self.dbuser = dbuser
-        self.dbpassword = dbpassword
-        self.dbport = dbport
+        self.function_manager = function_manager
 
     def create_thread(self, messages = None):
         thread = self.client.beta.threads.create(
@@ -212,58 +190,70 @@ class AssistantCommsHandler:
         return run_steps
     
     def wait_on_run(self, run, thread):
-        functions_returns = []
+        
 
         while run.status != "completed":
+
+            if run.status == "failed":
+                print("Failed")
+                show_json(self.list_run_steps(thread.id, run.id, order = "asc"))
+                break
+
+            if run.status == "cancelled":
+                print("Cancelled")
+                show_json(self.list_run_steps(thread.id, run.id, order = "asc"))
+                break
+
             run = self.retrieve_run(
                 thread_id=thread.id,
                 run_id=run.id,
             )
             time.sleep(0.5)
-            #print(run.status)
+            print(run.status)
+            print()
+            
 
             if run.status == "requires_action":
-                data = json.loads(run.model_dump_json())
-                function_entries = data["required_action"]["submit_tool_outputs"]["tool_calls"]
+                function_entries = run.required_action.submit_tool_outputs.tool_calls
                 functions_info = []
+                functions_returns = []
 
                 for entry in function_entries:
-                    function_call_id = entry["id"]
-                    function_name = entry["function"]["name"]
-                    arguments_str = json.loads(entry["function"]["arguments"])
+                    function_call_id = entry.id
+                    function_name = entry.function.name
+                    arguments_str = entry.function.arguments
 
                     functions_info.append((function_call_id, function_name, arguments_str))
 
-                function_manager = FunctionManager(self.dbhost, self.dbname, self.dbuser, self.dbpassword, self.dbport)
-
                 for function in functions_info:
-                    function_info_from_db = function_manager.retrieve_function_is_safe_by_name(function[1])
-                    db_function = function_info_from_db[0]
-                    db_is_safe = function_info_from_db[1]
-                    exec_result = {}
+                    inst = LazyLoadModule(function[1], **eval(function[2]))
 
+                    if 'client' in inst.model_dump():
+                        inst.client = self.client
+                    
+                    func_is_safe = inst.is_safe()
+                    
                     print(f"Function Call ID: {function[0]}, Function Name: {function[1]}, Arguments: {function[2]}")
-
-                    if not db_is_safe:
+                    print()
+                    #print(f"Instance: {inst}")
+                    
+                    if not func_is_safe:
                         want_to_run = input(f"do you want to run function: {function[1]}, with the following arguments: {function[2]}?: (y/n)")
                         if want_to_run.lower() != "y":
                             self.cancel_run(thread.id, run.id)
                             print("Canceled")
 
-                    exec(db_function, exec_result)
-
-                    db_to_py_function = exec_result.get(function[1])
-                    result = db_to_py_function(function[2])
+                    result = inst.run()
 
                     functions_returns.append({"tool_call_id": function[0], "output": str(result)})
 
-                function_manager.close_connection()
+                
 
                 if functions_returns:
                     self.submit_tool_outputs_to_run(thread.id, run.id, functions_returns)
-                    print("Returns")
-                    functions_returns.clear()
-                #self.wait_on_run(run, thread)
+                    #print(f"Returns: {functions_returns}")
+                    #functions_returns.clear()
+                
 
         # Keep this return
         return run

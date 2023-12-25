@@ -1,33 +1,15 @@
+from typing import Optional, Any, Literal
+from pydantic import Field
+from instructor import OpenAISchema
+
+
+
 class AssistantHandler:
 
-    """
-    A class that provides methods for managing assistants and associated files
-    using the OpenAI API.
-
-    Parameters:
-    - client (OpenAIAPI): An instance of the OpenAI API client.
-
-    Methods:
-    - retrieve_assistant(assistant_id): Retrieve information about a specific assistant.
-    - delete_assistant(assistant_id): Delete a specific assistant.
-    - list_all_assistants(): List all available assistants.
-    - filtered_list_assistants(limit_param=20, order_param='desc', after_param=None, before_param=None):
-        List assistants with optional filtering parameters.
-    - file_uploader(file): Upload a file to be associated with assistants.
-    - attach_file(assistant_id, file_id): Attach a file to a specific assistant.
-    - retrieve_assistant_files(assistant_id, file_id): Retrieve information about a specific file associated with an assistant.
-    - delete_assistant_file(assistant_id, file_id): Delete a specific file associated with an assistant.
-    - list_assistant_files(assistant_id): List all files associated with a specific assistant.
-
-    Note: Ensure that the OpenAI API client is instantiated before creating an instance of this class.
-    """
     
     def __init__(self, client):
         self.client = client
 
-    def retrieve_assistant(self, assistant_id):
-        my_assistant = self.client.beta.assistants.retrieve(assistant_id)
-        return my_assistant
         
     def delete_assistant(self, assistant_id):
         response = self.client.beta.assistants.delete(assistant_id)
@@ -87,3 +69,5 @@ class AssistantHandler:
         )
 
         return assistant_files
+    
+    
