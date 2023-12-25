@@ -1,7 +1,6 @@
 from typing import Optional, List, Literal, Dict, Any, Type
-from typing_extensions import Annotated
 
-from pydantic import Field, StringConstraints
+from pydantic import Field
 from instructor import OpenAISchema
 
 class Assistant(OpenAISchema):
@@ -16,7 +15,7 @@ class Assistant(OpenAISchema):
     client: Any = Field(default="",
             description="Open AI Client to be set by the user.")
     
-    name: Annotated[str, StringConstraints(min_length=5, max_length=80)] = Field(...,
+    name: str = Field(...,
         description="A descriptive name of the assistant. Must be between 5 and 80 characters in length.")
     
     description: str = Field(...,

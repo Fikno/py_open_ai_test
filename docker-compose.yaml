@@ -1,0 +1,11 @@
+services:
+  assistantdev:
+    build:
+      context: ./
+      dockerfile: dockerfiles/assistant-dev.dockerfile
+    volumes:
+      - ./:/app
+    env_file:
+      - ./env/openai.env
+    stdin_open: true
+    tty: true
